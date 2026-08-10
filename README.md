@@ -1,9 +1,14 @@
-# TRL — The Right Lifestyle
+# TRL Service Engine V2 — The Right Lifestyle
 
-**Build Your Future With Intelligence.**
+**Done-for-you AI Automation. Human-reviewed. Pakistan-first pricing.**
 
-[![Website Status](https://img.shields.io/website-up-down-green-red/https/therightlifestyle.github.io/TRL-SAAS-WEB/.svg)](https://therightlifestyle.github.io/TRL-SAAS-WEB/)
+[![Live Demo](https://img.shields.io/badge/Live-TRL_Service_Engine-2563EB)](https://therightlifestyle.github.io/TRL/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Deploy Ready](https://img.shields.io/badge/STATUS-READY_TO_DEPLOY-success)](GITHUB_DEPLOY.md)
+
+**This is the complete, deploy-ready Service Engine V2** — a full single-page sales + order system with admin tools and execution pack.
+
+> **Just attach the ZIP or these files to a fresh GitHub plugin chat and paste `GITHUB_DEPLOY.md`.** It will deploy in minutes.
 
 ---
 
@@ -30,7 +35,7 @@ Most people have dreams. Few have systems. TRL exists to give everyone access to
 
 This is the official TRL website — the digital headquarters of our company.
 
-**Live URL:** https://therightlifestyle.github.io/TRL-SAAS-WEB/
+**Live URL:** https://therightlifestyle.github.io/TRL/
 
 ### Website Sections
 
@@ -72,15 +77,18 @@ This is the official TRL website — the digital headquarters of our company.
 
 ```
 The-Right-Lifetsyle/
-├── index.html          # Main website
-├── style.css           # Styles
-├── script.js           # JavaScript
-├── app.html            # TRL Goals prototype
-├── privacy.html        # Privacy policy
-├── sitemap.xml         # SEO sitemap
-├── robots.txt          # Crawler instructions
-├── og-image.png       # Social sharing image
-└── README.md          # This file
+├── index.html                    # Main website (Service Engine V2)
+├── style.css                     # Styles
+├── script.js                     # JavaScript (currency, modal, admin, etc.)
+├── admin.html                    # Standalone Admin Dashboard (PIN: 9231)
+├── app.html                      # TRL Goals prototype
+├── privacy.html                  # Privacy policy
+├── GITHUB_DEPLOY.md              # Paste-ready GitHub plugin instructions
+├── WEEK1-2_EXECUTION_PACK.md     # 30-day client execution system (Weeks 1-2)
+├── README.md                     # This file
+├── sitemap.xml
+├── robots.txt
+└── og-image.png
 ```
 
 ---
@@ -146,9 +154,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Quick Links
 
-- [Live Website](https://therightlifestyle.github.io/TRL-SAAS-WEB/)
-- [Privacy Policy](https://therightlifestyle.github.io/TRL-SAAS-WEB/privacy.html)
-- [TRL Goals Prototype](https://therightlifestyle.github.io/TRL-SAAS-WEB/app.html)
+- [Live Website](https://therightlifestyle.github.io/TRL/)
+- [Privacy Policy](https://therightlifestyle.github.io/TRL/privacy.html)
+- [TRL Goals Prototype](https://therightlifestyle.github.io/TRL/app.html)
 
 ---
 
