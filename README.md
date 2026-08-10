@@ -35,7 +35,7 @@ Most people have dreams. Few have systems. TRL exists to give everyone access to
 
 This is the official TRL website — the digital headquarters of our company.
 
-**Live URL:** https://therightlifestyle.github.io/TRL-SAAS-WEB/
+**Live URL:** https://therightlifestyle.github.io/TRL/
 
 ### Website Sections
 
@@ -154,9 +154,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Quick Links
 
-- [Live Website](https://therightlifestyle.github.io/TRL-SAAS-WEB/)
-- [Privacy Policy](https://therightlifestyle.github.io/TRL-SAAS-WEB/privacy.html)
-- [TRL Goals Prototype](https://therightlifestyle.github.io/TRL-SAAS-WEB/app.html)
+- [Live Website](https://therightlifestyle.github.io/TRL/)
+- [Privacy Policy](https://therightlifestyle.github.io/TRL/privacy.html)
+- [TRL Goals Prototype](https://therightlifestyle.github.io/TRL/app.html)
 
 ---
 
