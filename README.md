@@ -2,7 +2,7 @@
 
 **Done-for-you AI Automation. Human-reviewed. Pakistan-first pricing.**
 
-[![Live Demo](https://img.shields.io/badge/Live-TRL_Service_Engine-2563EB)](https://therightlifestyle.github.io/TRL-SERVICE-ENGINE/)
+[![Live Demo](https://img.shields.io/badge/Live-TRL_Service_Engine-2563EB)](https://therightlifestyle.github.io/TRL/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Deploy Ready](https://img.shields.io/badge/STATUS-READY_TO_DEPLOY-success)](GITHUB_DEPLOY.md)
 

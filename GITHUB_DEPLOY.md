@@ -39,7 +39,7 @@ README.md
 
 ## 🛠️ EXACT STEPS (copy-paste ready)
 
-1. **Create new repo** named: `TRL-SERVICE-ENGINE`
+1. **Create new repo** named: `TRL`
 
 2. **Upload / push these files** (the plugin will handle it):
    - `index.html`
@@ -54,7 +54,7 @@ README.md
 
 4. **Your live URL will be**:
    ```
-   https://YOUR-USERNAME.github.io/TRL-SERVICE-ENGINE/
+   https://YOUR-USERNAME.github.io/TRL/
    ```
 
 ---
@@ -95,7 +95,7 @@ const ADMIN_PIN = '9231';    // ← Change this to your secret PIN
 If you want to ship the complete offline package:
 
 ```
-TRL-SERVICE-ENGINE/
+TRL/
 ├── index.html
 ├── style.css
 ├── script.js
@@ -109,7 +109,7 @@ TRL-SERVICE-ENGINE/
 ## 🎯 Bonus: One-liner for the GitHub plugin
 
 ```
-Create a new public GitHub repo called TRL-SERVICE-ENGINE.
+Create a new public GitHub repo called TRL.
 Upload these exact files: index.html, style.css, script.js.
 Enable GitHub Pages on the main branch (root).
 Change the admin PIN in script.js to something private.

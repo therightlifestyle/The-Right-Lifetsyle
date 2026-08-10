@@ -81,7 +81,7 @@ This pack completes the full arc: Weeks 1–4.
 
 - [Order Form / Service Tiers](index.html#services)
 - [Admin Dashboard](admin.html) (PIN: 9231)
-- Main site: [therightlifestyle.github.io/TRL-SERVICE-ENGINE](https://therightlifestyle.github.io/TRL-SERVICE-ENGINE/)
+- Main site: [therightlifestyle.github.io/TRL](https://therightlifestyle.github.io/TRL/)
 
 ---
 
