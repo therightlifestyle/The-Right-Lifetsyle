@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRL Admin — Service Engine Dashboard</title>
+    <meta name="theme-color" content="#050505">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #050505;
+            --dark: #0B0F19;
+            --dark-surface: #111827;
+            --accent: #2563EB;
+            --gradient: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+            --gray-100: #F3F4F6;
+            --gray-400: #9CA3AF;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--black); color: var(--gray-100); line-height:1.6; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+        header { padding: 24px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .header-inner { display:flex; align-items:center; justify-content:space-between; }
+        .logo { font-size:24px; font-weight:900; background:var(--gradient); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .badge { font-size:11px; padding:2px 10px; background:rgba(37,99,235,0.15); color:#60a5fa; border-radius:999px; }
+        .section { padding: 32px 0; }
+        .kpi-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:16px; margin-bottom:32px; }
+        .kpi-card { background:#111827; border:1px solid #334155; border-radius:12px; padding:18px 20px; }
+        .kpi-card .label { font-size:12px; color:#94a3b8; margin-bottom:4px; }
+        .kpi-card .value { font-size:28px; font-weight:800; line-height:1; }
+        table { width:100%; border-collapse:collapse; background:#111827; border-radius:12px; overflow:hidden; }
+        th, td { padding:14px 18px; text-align:left; border-bottom:1px solid #334155; font-size:14px; }
+        th { background:#1f2937; font-size:12px; text-transform:uppercase; color:#94a3b8; }
+        .status { padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; }
+        .status.pending { background:#f59e0b20; color:#f59e0b; }
+        .status.paid { background:#10b98120; color:#10b981; }
+        .status.delivered { background:#2563eb20; color:#2563eb; }
+        .btn { padding:8px 16px; border-radius:8px; font-weight:700; font-size:13px; cursor:pointer; border:none; }
+        .btn-pay { background:#25D366; color:white; }
+        .unlock { max-width:340px; margin:80px auto; text-align:center; background:#111827; padding:40px 32px; border-radius:16px; border:1px solid #334155; }
+        .unlock input { width:100%; padding:14px; background:#0a0f1a; border:1px solid #334155; border-radius:10px; color:white; margin-bottom:12px; font-size:16px; }
+        .unlock button { width:100%; padding:14px; background:var(--gradient); color:white; font-weight:700; border-radius:10px; }
+        .hidden { display:none; }
+        .nav { display:flex; gap:16px; }
+        .nav a { color:#94a3b8; text-decoration:none; font-size:14px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container header-inner">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <div class="logo">TRL</div>
+                <span class="badge">ADMIN v2</span>
+            </div>
+            <div class="nav">
+                <a href="index.html">← Back to Site</a>
+                <a href="#orders">Orders</a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Unlock Screen -->
+        <div id="unlockScreen" class="unlock">
+            <h2 style="margin-bottom:8px;">Admin Dashboard</h2>
+            <p style="color:#64748b; margin-bottom:20px;">TRL Service Engine • Internal</p>
+            <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="6">
+            <button onclick="unlockAdmin()">Unlock Dashboard</button>
+            <p style="margin-top:12px; font-size:12px; color:#64748b;">Demo PIN: 9231</p>
+        </div>
+
+        <!-- Main Admin Panel -->
+        <div id="adminPanel" class="hidden">
+            <div class="section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+                    <div>
+                        <span style="font-size:12px; color:#64748b; letter-spacing:1px;">INTERNAL</span>
+                        <h1 style="font-size:28px; font-weight:800;">Service Engine Dashboard</h1>
+                    </div>
+                    <div style="font-size:13px; color:#64748b;">
+                        <span id="refreshTime"></span> • 
+                        <button onclick="refreshData()" style="background:none;border:1px solid #334155;color:#94a3b8;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;">Refresh</button>
+                    </div>
+                </div>
+
+                <!-- KPIs -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="label">TODAY'S ORDERS</div>
+                        <div class="value" id="kpiToday">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">PENDING DEPOSITS</div>
+                        <div class="value" id="kpiPending">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">ACTIVE CLIENTS</div>
+                        <div class="value" id="kpiActive">—</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="label">AVG DELIVERY</div>
+                        <div class="value" id="kpiAvg">4.2d</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 0 0 12px; font-size:16px;">Recent Orders</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>Tier</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersBody"></tbody>
+                </table>
+                
+                <div style="margin-top:24px; font-size:13px; color:#64748b; text-align:center;">
+                    All data is local (demo). Payment requests open WhatsApp with pre-filled message.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EXCHANGE_RATE = 280;
+        const ADMIN_PIN = '9231';
+        let orders = [];
+
+        function loadOrders() {
+            try {
+                const saved = localStorage.getItem('trl_orders_v2');
+                orders = saved ? JSON.parse(saved) : [];
+            } catch(e) { orders = []; }
+            
+            // Seed if empty
+            if (orders.length === 0) {
+                orders = [
+                    { id: 1723300001, tier: 'Growth OS', price: 799, currency: 'USD', customer: 'Ayesha Malik', phone: '923001234567', date: '2026-08-10', status: 'pending' },
+                    { id: 1723300002, tier: 'Starter', price: 299, currency: 'PKR', customer: 'Bilal Hassan', phone: '923151234567', date: '2026-08-10', status: 'pending' },
+                    { id: 1723300003, tier: 'Premium Scale', price: 1999, currency: 'USD', customer: 'Sara Khan', phone: '923009876543', date: '2026-08-08', status: 'paid' },
+                    { id: 1723300004, tier: 'Growth OS', price: 799, currency: 'USD', customer: 'Hamza Raza', phone: '923192345678', date: '2026-08-09', status: 'delivered' }
+                ];
+                saveOrders();
+            }
+        }
+
+        function saveOrders() {
+            try { localStorage.setItem('trl_orders_v2', JSON.stringify(orders)); } catch(e){}
+        }
+
+        function updateKPIs() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayCount = orders.filter(o => o.date === today).length;
+            
+            const pendingUSD = orders
+                .filter(o => o.status === 'pending')
+                .reduce((sum, o) => {
+                    const usd = o.currency === 'USD' ? o.price : Math.round(o.price / EXCHANGE_RATE);
+                    return sum + usd;
+                }, 0);
+
+            document.getElementById('kpiToday').textContent = todayCount;
+            document.getElementById('kpiPending').textContent = '$' + pendingUSD;
+            document.getElementById('kpiActive').textContent = orders.filter(o => o.status !== 'delivered').length;
+        }
+
+        function renderOrders() {
+            const tbody = document.getElementById('ordersBody');
+            tbody.innerHTML = '';
+
+            const recent = [...orders].sort((a,b) => b.id - a.id).slice(0, 10);
+
+            recent.forEach(order => {
+                const tr = document.createElement('tr');
+                const priceStr = order.currency === 'USD' 
+                    ? '$' + order.price 
+                    : '₨' + order.price;
+
+                const statusHTML = `<span class="status ${order.status}">${order.status}</span>`;
+
+                let actionHTML = '';
+                if (order.status === 'pending') {
+                    actionHTML = `<button class="btn btn-pay" onclick="requestPayment(${order.id})">Request Payment</button>`;
+                } else {
+                    actionHTML = `<span style="color:#64748b;font-size:12px;">${order.status}</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong>${order.customer}</strong><br><small style="color:#64748b">${order.phone}</small></td>
+                    <td>${order.tier}</td>
+                    <td><strong>${priceStr}</strong></td>
+                    <td>${statusHTML}</td>
+                    <td>${actionHTML}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function requestPayment(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+
+            const deposit = order.currency === 'USD' 
+                ? Math.round(order.price * 0.5) 
+                : Math.round(order.price * 0.5);
+
+            const priceDisplay = order.currency === 'USD' 
+                ? '$' + deposit 
+                : '₨' + deposit;
+
+            const msg = `Hi ${order.customer.split(' ')[0]}, this is TRL for your ${order.tier} order.
+
+Please send the 50% deposit of ${priceDisplay} to start.
+
+Bank / JazzCash / EasyPaisa details will be shared after confirmation.
+
+Reply "PAID" once sent.`;
+
+            const wa = `https://wa.me/${order.phone}?text=${encodeURIComponent(msg)}`;
+            window.open(wa, '_blank');
+
+            // Demo: mark as paid
+            order.status = 'paid';
+            saveOrders();
+            renderOrders();
+            updateKPIs();
+        }
+
+        function unlockAdmin() {
+            const pin = document.getElementById('pinInput').value.trim();
+            const unlock = document.getElementById('unlockScreen');
+            const panel = document.getElementById('adminPanel');
+
+            if (pin === ADMIN_PIN) {
+                unlock.classList.add('hidden');
+                panel.classList.remove('hidden');
+                loadOrders();
+                renderOrders();
+                updateKPIs();
+                
+                const timeEl = document.getElementById('refreshTime');
+                if (timeEl) timeEl.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+            } else {
+                const input = document.getElementById('pinInput');
+                input.style.borderColor = '#ef4444';
+                setTimeout(() => { if (input) input.style.borderColor = '#334155'; }, 1200);
+            }
+        }
+
+        function refreshData() {
+            loadOrders();
+            renderOrders();
+            updateKPIs();
+            const timeEl = document.getElementById('refreshTime');
+            if (timeEl) timeEl.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+        }
+
+        // Keyboard support
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.getElementById('unlockScreen').style.display !== 'none') {
+                const pinInput = document.getElementById('pinInput');
+                if (document.activeElement === pinInput) {
+                    unlockAdmin();
+                }
+            }
+        });
+
+        // Auto-load if already unlocked (for dev convenience)
+        window.onload = function() {
+            // Optional: auto-unlock for testing in some environments
+            // document.getElementById('pinInput').value = '9231';
+        };
+    </script>
+</body>
+</html>
