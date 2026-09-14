@@ -44,7 +44,6 @@
             <a href="#services">Services</a>
             <a href="#framework">Framework</a>
             <a href="#progress">Progress</a>
-            <a href="admin.html" style="color:#64748b;font-size:13px;">Admin</a>
             <a href="#access" class="nav-cta">Order Now</a>
         </div>
         <!-- Currency Toggle -->
@@ -60,7 +59,6 @@
         <a href="#services">Services</a>
         <a href="#framework">Framework</a>
         <a href="#progress">Progress</a>
-        <a href="admin.html">Admin</a>
         <a href="#access" class="mobile-cta">Order Now</a>
     </div>
 
@@ -769,7 +767,7 @@
                     <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                         <div class="form-group">
                             <label>WhatsApp Number</label>
-                            <input type="tel" id="custPhone" required placeholder="+92 300 1234567" value="+923001234567">
+                                <input type="tel" id="custPhone" required placeholder="+92 300 1234567" autocomplete="tel">
                         </div>
                         <div class="form-group">
                             <label>Email</label>
@@ -782,7 +780,7 @@
                     </div>
                     <div class="form-group">
                         <label>Preferred Start Date</label>
-                        <input type="date" id="custDate" value="2026-08-18">
+                                <input type="date" id="custDate">
                     </div>
                 </form>
 
@@ -798,69 +796,6 @@
             </div>
         </div>
     </div>
-
-    <!-- ADMIN DASHBOARD -->
-    <section class="admin-section" id="admin">
-        <div class="container">
-            <div class="admin-header">
-                <div>
-                    <span class="section-label">INTERNAL</span>
-                    <h2 style="margin:0;font-size:28px;">Admin Dashboard</h2>
-                </div>
-                <div style="font-size:13px;color:#64748b;">TRL Service Engine • v2</div>
-            </div>
-
-            <!-- Unlock -->
-            <div id="adminUnlock" class="admin-unlock">
-                <p style="margin-bottom:12px;color:#94a3b8;">Enter admin PIN to unlock</p>
-                <input type="password" id="adminPin" placeholder="PIN" maxlength="6" value="">
-                <button onclick="unlockAdmin()">Unlock</button>
-                <div style="margin-top:8px;font-size:12px;color:#64748b;">Demo PIN: 9231</div>
-            </div>
-
-            <div id="adminPanel" class="admin-panel">
-                <!-- KPIs -->
-                <div class="kpi-grid">
-                    <div class="kpi-card">
-                        <div class="label">TODAY'S ORDERS</div>
-                        <div class="value" id="kpiToday">4</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="label">PENDING DEPOSITS</div>
-                        <div class="value" id="kpiPending">$1,199</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="label">ACTIVE CLIENTS</div>
-                        <div class="value" id="kpiActive">12</div>
-                    </div>
-                    <div class="kpi-card">
-                        <div class="label">AVG DELIVERY</div>
-                        <div class="value" id="kpiAvg">4.2d</div>
-                    </div>
-                </div>
-
-                <h4 style="margin: 0 0 12px 4px; font-size:14px; color:#cbd5e1;">Today's Orders</h4>
-                <table class="orders-table" id="ordersTable">
-                    <thead>
-                        <tr>
-                            <th>Customer</th>
-                            <th>Tier</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersBody">
-                        <!-- Populated by JS -->
-                    </tbody>
-                </table>
-
-                <div style="margin-top: 20px; font-size: 13px; color: #64748b;">
-                    All orders automatically sync to WhatsApp • Last refresh: <span id="adminTime"></span>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Footer -->
     <footer>
@@ -899,7 +834,6 @@
                 <div class="footer-col">
                     <h4>Resources</h4>
                     <ul>
-                        <li><a href="admin.html">Admin Dashboard</a></li>
                         <li><a href="WEEK1-2_EXECUTION_PACK.md">Execution Pack (PDF-ready)</a></li>
                         <li><a href="privacy.html">Privacy Policy</a></li>
                         <li><a href="app.html">TRL Goals Prototype</a></li>

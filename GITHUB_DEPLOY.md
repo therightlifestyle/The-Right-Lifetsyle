@@ -13,7 +13,8 @@ The complete, production-ready **TRL Service Engine V2** (single-page app):
 - **Copy summary** button
 - **ESC key** closes modal + mobile menu
 - Mobile hamburger menu
-- **Admin Dashboard** (unlock with PIN `9231`)
+- **Admin Dashboard** (`admin.html`, unlisted + `noindex`)
+  - Client-side PIN only — **not real security**
   - Today's orders KPI
   - Request payment → opens WhatsApp
 - Results strip + "The TRL Standard" section
@@ -61,11 +62,16 @@ README.md
 
 ## 🔑 IMPORTANT CONFIG (change these)
 
-### In `script.js`:
+### In `admin.html`:
 ```js
 const EXCHANGE_RATE = 280;   // ← Update if rate changes
-const ADMIN_PIN = '9231';    // ← Change this to your secret PIN
+const ADMIN_PIN = '…';       // ← Set a private PIN. NOTE: it stays readable in
+                             //    View Source. This gates nothing real — do not
+                             //    store live customer data here until a backend exists.
 ```
+
+> `ADMIN_PIN` was removed from `script.js`; the homepage no longer embeds an
+> admin panel, and `admin.html` is no longer linked from any navigation.
 
 ### In `index.html` (footer + links):
 - WhatsApp number: `923190091457` → replace with real number
@@ -82,9 +88,9 @@ const ADMIN_PIN = '9231';    // ← Change this to your secret PIN
 2. Click **PKR** toggle → all prices instantly switch
 3. Click any **Order** button → modal opens with correct ETA
 4. Fill form → **Copy Summary** or **Send via WhatsApp**
-5. Scroll to bottom → **Admin Dashboard**
-   - Enter PIN: `9231`
-   - See demo orders + "Request Payment" buttons
+5. Visit `admin.html` directly by URL (it is intentionally unlinked)
+   - Enter your private PIN
+   - Dashboard shows an empty state until a backend is connected
 6. Press **ESC** while modal is open → closes
 7. On mobile: hamburger menu works
 
@@ -112,7 +118,7 @@ TRL/
 Create a new public GitHub repo called TRL.
 Upload these exact files: index.html, style.css, script.js.
 Enable GitHub Pages on the main branch (root).
-Change the admin PIN in script.js to something private.
+Change the admin PIN in admin.html to something private.
 Report back the live URL.
 ```
 

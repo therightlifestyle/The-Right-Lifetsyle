@@ -80,7 +80,7 @@ This pack completes the full arc: Weeks 1–4.
 ## 📎 Quick Reference Links
 
 - [Order Form / Service Tiers](index.html#services)
-- [Admin Dashboard](admin.html) (PIN: 9231)
+- [Admin Dashboard](admin.html) (unlisted — PIN set privately in `admin.html`)
 - Main site: [therightlifestyle.github.io/TRL](https://therightlifestyle.github.io/TRL/)
 
 ---

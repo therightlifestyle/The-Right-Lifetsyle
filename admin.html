@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TRL Admin — Service Engine Dashboard</title>
     <meta name="theme-color" content="#050505">
+    <meta name="robots" content="noindex, nofollow, noarchive">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -66,9 +67,12 @@
         <div id="unlockScreen" class="unlock">
             <h2 style="margin-bottom:8px;">Admin Dashboard</h2>
             <p style="color:#64748b; margin-bottom:20px;">TRL Service Engine • Internal</p>
-            <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="6">
+            <input type="password" id="pinInput" placeholder="Enter PIN" maxlength="6"
+                   aria-label="Admin PIN" autocomplete="off">
             <button onclick="unlockAdmin()">Unlock Dashboard</button>
-            <p style="margin-top:12px; font-size:12px; color:#64748b;">Demo PIN: 9231</p>
+            <p style="margin-top:12px; font-size:12px; color:#ef4444;">
+                ⚠️ Client-side PIN — not real security. Do not store live customer data here until a backend exists.
+            </p>
         </div>
 
         <!-- Main Admin Panel -->
@@ -101,7 +105,7 @@
                     </div>
                     <div class="kpi-card">
                         <div class="label">AVG DELIVERY</div>
-                        <div class="value" id="kpiAvg">4.2d</div>
+                        <div class="value" id="kpiAvg">—</div>
                     </div>
                 </div>
 
@@ -137,16 +141,8 @@
                 orders = saved ? JSON.parse(saved) : [];
             } catch(e) { orders = []; }
             
-            // Seed if empty
-            if (orders.length === 0) {
-                orders = [
-                    { id: 1723300001, tier: 'Growth OS', price: 799, currency: 'USD', customer: 'Ayesha Malik', phone: '923001234567', date: '2026-08-10', status: 'pending' },
-                    { id: 1723300002, tier: 'Starter', price: 299, currency: 'PKR', customer: 'Bilal Hassan', phone: '923151234567', date: '2026-08-10', status: 'pending' },
-                    { id: 1723300003, tier: 'Premium Scale', price: 1999, currency: 'USD', customer: 'Sara Khan', phone: '923009876543', date: '2026-08-08', status: 'paid' },
-                    { id: 1723300004, tier: 'Growth OS', price: 799, currency: 'USD', customer: 'Hamza Raza', phone: '923192345678', date: '2026-08-09', status: 'delivered' }
-                ];
-                saveOrders();
-            }
+            // No demo seeding. An empty dashboard must look empty —
+            // fabricated orders previously displayed as real revenue.
         }
 
         function saveOrders() {
@@ -172,6 +168,18 @@
         function renderOrders() {
             const tbody = document.getElementById('ordersBody');
             tbody.innerHTML = '';
+
+            if (!orders.length) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 5;
+                td.style.cssText = 'text-align:center;padding:32px 16px;color:#64748b;font-size:14px;';
+                td.textContent = 'No orders recorded in this browser. Orders currently arrive via WhatsApp — '
+                               + 'this dashboard needs a backend to show them.';
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
 
             const recent = [...orders].sort((a,b) => b.id - a.id).slice(0, 10);
 
@@ -272,8 +280,7 @@ Reply "PAID" once sent.`;
 
         // Auto-load if already unlocked (for dev convenience)
         window.onload = function() {
-            // Optional: auto-unlock for testing in some environments
-            // document.getElementById('pinInput').value = '9231';
+            // Intentionally empty. Never auto-fill or auto-unlock the PIN.
         };
     </script>
 </body>

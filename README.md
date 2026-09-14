@@ -79,8 +79,8 @@ This is the official TRL website — the digital headquarters of our company.
 The-Right-Lifetsyle/
 ├── index.html                    # Main website (Service Engine V2)
 ├── style.css                     # Styles
-├── script.js                     # JavaScript (currency, modal, admin, etc.)
-├── admin.html                    # Standalone Admin Dashboard (PIN: 9231)
+├── script.js                     # JavaScript (currency, order modal, UX)
+├── admin.html                    # Internal dashboard — unlisted, noindexed (see security note below)
 ├── app.html                      # TRL Goals prototype
 ├── privacy.html                  # Privacy policy
 ├── GITHUB_DEPLOY.md              # Paste-ready GitHub plugin instructions

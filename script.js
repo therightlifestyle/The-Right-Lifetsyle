@@ -7,7 +7,6 @@
 
 // ====================== CONFIG ======================
 const EXCHANGE_RATE = 280; // USD to PKR (configurable)
-const ADMIN_PIN = '9231';
 
 // ====================== CURRENCY TOGGLE ======================
 let currentCurrency = 'USD';
@@ -157,10 +156,17 @@ function openOrderModal(tierName, usdPrice, eta) {
     // Prefill form if possible
     const nameInput = document.getElementById('custName');
     const phoneInput = document.getElementById('custPhone');
-    
+    const dateInput = document.getElementById('custDate');
+
     try {
         if (nameInput && !nameInput.value) nameInput.value = localStorage.getItem('trl_last_name') || '';
-        if (phoneInput && !phoneInput.value) phoneInput.value = localStorage.getItem('trl_last_phone') || '+923001234567';
+        if (phoneInput && !phoneInput.value) phoneInput.value = localStorage.getItem('trl_last_phone') || '';
+        // Default the start date to tomorrow, never a hardcoded/past date
+        if (dateInput && !dateInput.value) {
+            const d = new Date();
+            d.setDate(d.getDate() + 1);
+            dateInput.value = d.toISOString().split('T')[0];
+        }
     } catch(e){}
 
     modal.classList.add('open');
@@ -277,23 +283,11 @@ Preferred start date: ${date}
 
 Please send me the payment link / invoice.`;
 
-    // Save for later
+    // Save for later (customer's own device only)
     try {
         localStorage.setItem('trl_last_name', document.getElementById('custName').value);
         localStorage.setItem('trl_last_phone', document.getElementById('custPhone').value);
     } catch(e){}
-
-    // Record order locally (for admin)
-    saveOrderToLocal({
-        id: Date.now(),
-        tier: currentOrder.tier,
-        price: currentOrder.price,
-        currency: currentCurrency,
-        customer: document.getElementById('custName').value,
-        phone: phone,
-        date: new Date().toISOString().split('T')[0],
-        status: 'pending'
-    });
 
     const waLink = `https://wa.me/923190091457?text=${encodeURIComponent(message)}`;
     window.open(waLink, '_blank');
@@ -316,151 +310,6 @@ function showToast(msg) {
         toast.style.opacity = '0';
         setTimeout(() => toast.remove(), 300);
     }, 2600);
-}
-
-// ====================== ADMIN DASHBOARD ======================
-let orders = [];
-
-function loadOrders() {
-    try {
-        const saved = localStorage.getItem('trl_orders_v2');
-        orders = saved ? JSON.parse(saved) : [];
-    } catch (e) {
-        orders = [];
-    }
-    
-    // Seed demo orders if empty (for demo purposes)
-    if (orders.length === 0) {
-        orders = [
-            { id: 1723300001, tier: 'Growth OS', price: 799, currency: 'USD', customer: 'Ayesha Malik', phone: '923001234567', date: '2026-08-09', status: 'pending' },
-            { id: 1723300002, tier: 'Starter', price: 299, currency: 'PKR', customer: 'Bilal Hassan', phone: '923151234567', date: '2026-08-10', status: 'pending' },
-            { id: 1723300003, tier: 'Premium Scale', price: 1999, currency: 'USD', customer: 'Sara Khan', phone: '923009876543', date: '2026-08-08', status: 'paid' },
-            { id: 1723300004, tier: 'Growth OS', price: 799, currency: 'USD', customer: 'Hamza Raza', phone: '923192345678', date: '2026-08-10', status: 'delivered' }
-        ];
-        saveOrders();
-    }
-}
-
-function saveOrders() {
-    try { localStorage.setItem('trl_orders_v2', JSON.stringify(orders)); } catch(e){}
-}
-
-function saveOrderToLocal(order) {
-    orders.unshift(order); // newest first
-    saveOrders();
-    if (document.getElementById('adminPanel')?.classList.contains('active')) {
-        renderOrdersTable();
-        updateKPIs();
-    }
-}
-
-function updateKPIs() {
-    const today = new Date().toISOString().split('T')[0];
-    const todayOrders = orders.filter(o => o.date === today).length;
-    
-    const pending = orders.filter(o => o.status === 'pending')
-        .reduce((sum, o) => sum + (o.currency === 'USD' ? o.price : Math.round(o.price / EXCHANGE_RATE)), 0);
-
-    document.getElementById('kpiToday').textContent = todayOrders;
-    document.getElementById('kpiPending').textContent = '$' + pending;
-    document.getElementById('kpiActive').textContent = orders.filter(o => o.status !== 'delivered').length;
-    document.getElementById('kpiAvg').textContent = '4.2d';
-}
-
-function renderOrdersTable() {
-    const tbody = document.getElementById('ordersBody');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-
-    const recent = orders.slice(0, 8); // show last 8
-
-    recent.forEach(order => {
-        const tr = document.createElement('tr');
-
-        const priceStr = order.currency === 'USD' 
-            ? '$' + order.price 
-            : '₨' + order.price;
-
-        const statusClass = order.status;
-        const statusText = order.status.charAt(0).toUpperCase() + order.status.slice(1);
-
-        tr.innerHTML = `
-            <td><strong>${order.customer}</strong><br><small style="color:#64748b">${order.phone}</small></td>
-            <td>${order.tier}</td>
-            <td><strong>${priceStr}</strong></td>
-            <td><span class="status ${statusClass}">${statusText}</span></td>
-            <td>
-                ${order.status === 'pending' 
-                    ? `<button class="btn-pay" onclick="requestPayment(${order.id})">Request Payment</button>` 
-                    : `<span style="color:#64748b;font-size:12px;">${order.status}</span>`}
-            </td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-function requestPayment(orderId) {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return;
-
-    const deposit = order.currency === 'USD' 
-        ? Math.round(order.price * 0.5) 
-        : Math.round(order.price * 0.5);
-
-    const priceDisplay = order.currency === 'USD' 
-        ? '$' + deposit 
-        : '₨' + deposit;
-
-    const msg = `Hi ${order.customer.split(' ')[0]}, this is TRL for your ${order.tier} order.
-
-Please send the 50% deposit of ${priceDisplay} to start.
-
-Bank / JazzCash / EasyPaisa details will be shared after confirmation.
-
-Reply "PAID" once sent.`;
-
-    const wa = `https://wa.me/${order.phone}?text=${encodeURIComponent(msg)}`;
-    window.open(wa, '_blank');
-
-    // Update status in demo
-    order.status = 'paid';
-    saveOrders();
-    renderOrdersTable();
-    updateKPIs();
-}
-
-function unlockAdmin() {
-    const pinInput = document.getElementById('adminPin');
-    const unlockDiv = document.getElementById('adminUnlock');
-    const panel = document.getElementById('adminPanel');
-
-    if (!pinInput || !unlockDiv || !panel) return;
-
-    if (pinInput.value.trim() === ADMIN_PIN) {
-        unlockDiv.style.display = 'none';
-        panel.classList.add('active');
-        
-        loadOrders();
-        renderOrdersTable();
-        updateKPIs();
-        
-        // Live time
-        const timeEl = document.getElementById('adminTime');
-        if (timeEl) timeEl.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-        
-        // Re-render occasionally (demo)
-        setInterval(() => {
-            if (panel.classList.contains('active')) {
-                updateKPIs();
-            }
-        }, 45000);
-    } else {
-        pinInput.style.borderColor = '#ef4444';
-        setTimeout(() => {
-            if (pinInput) pinInput.style.borderColor = '#334155';
-        }, 1200);
-    }
 }
 
 // ====================== OTHER ENHANCEMENTS ======================
@@ -505,9 +354,6 @@ function initTRLServiceEngine() {
     // Forms
     initFormEnhancements();
 
-    // Load orders early for admin
-    loadOrders();
-
     // Keyboard accessibility hint
     document.addEventListener('keydown', function(e) {
         if (e.key === '/' && document.activeElement.tagName === 'BODY') {
@@ -539,11 +385,10 @@ function initTRLServiceEngine() {
         switchCurrency: (c) => {
             currentCurrency = c;
             updateAllPrices();
-        },
-        getOrders: () => orders
+        }
     };
 
-    console.log('%c[TRL V2] Service Engine initialized. Currency toggle, modal, admin, ESC ready.', 'color:#10b981');
+    console.log('%c[TRL V2] Service Engine initialized. Currency toggle, modal, ESC ready.', 'color:#10b981');
 }
 
 // Boot
