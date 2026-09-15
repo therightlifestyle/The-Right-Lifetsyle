@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
 
-Sitemap: https://therightlifestyle.github.io/TRL-SAAS-WEB/sitemap.xml
+Sitemap: https://therightlifestyle.github.io/The-Right-Lifetsyle/sitemap.xml

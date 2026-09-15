@@ -81,7 +81,7 @@ This pack completes the full arc: Weeks 1–4.
 
 - [Order Form / Service Tiers](index.html#services)
 - [Admin Dashboard](admin.html) (unlisted — PIN set privately in `admin.html`)
-- Main site: [therightlifestyle.github.io/TRL](https://therightlifestyle.github.io/TRL/)
+- Main site: [therightlifestyle.github.io/TRL](https://therightlifestyle.github.io/The-Right-Lifetsyle/)
 
 ---
 

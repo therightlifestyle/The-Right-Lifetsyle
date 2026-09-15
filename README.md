@@ -2,7 +2,7 @@
 
 **Done-for-you AI Automation. Human-reviewed. Pakistan-first pricing.**
 
-[![Live Demo](https://img.shields.io/badge/Live-TRL_Service_Engine-2563EB)](https://therightlifestyle.github.io/TRL/)
+[![Live Demo](https://img.shields.io/badge/Live-TRL_Service_Engine-2563EB)](https://therightlifestyle.github.io/The-Right-Lifetsyle/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Deploy Ready](https://img.shields.io/badge/STATUS-READY_TO_DEPLOY-success)](GITHUB_DEPLOY.md)
 
@@ -35,7 +35,7 @@ Most people have dreams. Few have systems. TRL exists to give everyone access to
 
 This is the official TRL website — the digital headquarters of our company.
 
-**Live URL:** https://therightlifestyle.github.io/TRL/
+**Live URL:** https://therightlifestyle.github.io/The-Right-Lifetsyle/
 
 ### Website Sections
 
@@ -154,9 +154,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Quick Links
 
-- [Live Website](https://therightlifestyle.github.io/TRL/)
-- [Privacy Policy](https://therightlifestyle.github.io/TRL/privacy.html)
-- [TRL Goals Prototype](https://therightlifestyle.github.io/TRL/app.html)
+- [Live Website](https://therightlifestyle.github.io/The-Right-Lifetsyle/)
+- [Privacy Policy](https://therightlifestyle.github.io/The-Right-Lifetsyle/privacy.html)
+- [TRL Goals Prototype](https://therightlifestyle.github.io/The-Right-Lifetsyle/app.html)
 
 ---
 
