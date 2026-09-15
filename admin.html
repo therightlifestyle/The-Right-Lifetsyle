@@ -31,7 +31,8 @@
         .kpi-card { background:#111827; border:1px solid #334155; border-radius:12px; padding:18px 20px; }
         .kpi-card .label { font-size:12px; color:#94a3b8; margin-bottom:4px; }
         .kpi-card .value { font-size:28px; font-weight:800; line-height:1; }
-        table { width:100%; border-collapse:collapse; background:#111827; border-radius:12px; overflow:hidden; }
+        .table-wrap { background:#111827; border:1px solid #334155; border-radius:12px; overflow:hidden; }
+        table { width:100%; border-collapse:collapse; }
         th, td { padding:14px 18px; text-align:left; border-bottom:1px solid #334155; font-size:14px; }
         th { background:#1f2937; font-size:12px; text-transform:uppercase; color:#94a3b8; }
         .status { padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700; }
@@ -110,18 +111,20 @@
                 </div>
 
                 <h3 style="margin: 0 0 12px; font-size:16px;">Recent Orders</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Customer</th>
-                            <th>Tier</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ordersBody"></tbody>
-                </table>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Tier</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody"></tbody>
+                    </table>
+                </div>
                 
                 <div style="margin-top:24px; font-size:13px; color:#64748b; text-align:center;">
                     All data is local (demo). Payment requests open WhatsApp with pre-filled message.
@@ -268,13 +271,16 @@ Reply "PAID" once sent.`;
             if (timeEl) timeEl.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
         }
 
-        // Keyboard support
+        // Keyboard support (the unlock screen is hidden via the .hidden class,
+        // so check the class — not the inline style)
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && document.getElementById('unlockScreen').style.display !== 'none') {
-                const pinInput = document.getElementById('pinInput');
-                if (document.activeElement === pinInput) {
-                    unlockAdmin();
-                }
+            if (e.key !== 'Enter') return;
+            const unlockScreen = document.getElementById('unlockScreen');
+            const pinInput = document.getElementById('pinInput');
+            if (unlockScreen && !unlockScreen.classList.contains('hidden')
+                && document.activeElement === pinInput) {
+                e.preventDefault();
+                unlockAdmin();
             }
         });
 

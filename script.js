@@ -1,24 +1,48 @@
 /**
  * TRL Service Engine V2 — The Right Lifestyle
- * Full Service Machine: Currency, Orders, Modal, Admin, Mobile
+ * Currency, Orders, Modal, Access Form, Mobile Menu, Scroll Effects
  */
 
 'use strict';
 
 // ====================== CONFIG ======================
-const EXCHANGE_RATE = 280; // USD to PKR (configurable)
+const EXCHANGE_RATE = 280; // USD -> PKR (fallback; card data-pkr wins)
+
+// ====================== STATE ======================
+let currentCurrency = 'USD';
+let currentOrder = null;
+
+// ====================== HELPERS ======================
+const $ = (id) => document.getElementById(id);
+
+function getTierPKR(tierName) {
+    const cards = document.querySelectorAll('.tier-card');
+    for (const c of cards) {
+        const h3 = c.querySelector('h3');
+        if (h3 && h3.textContent.trim() === tierName && c.dataset.pkr) {
+            return parseInt(c.dataset.pkr, 10);
+        }
+    }
+    return null;
+}
+
+function formatPrice(usdAmount, tierName) {
+    if (currentCurrency === 'PKR') {
+        const pkr = (tierName && getTierPKR(tierName)) || Math.round(usdAmount * EXCHANGE_RATE);
+        return '₨' + pkr.toLocaleString('en-US');
+    }
+    return '$' + Number(usdAmount).toLocaleString('en-US');
+}
 
 // ====================== CURRENCY TOGGLE ======================
-let currentCurrency = 'USD';
-
 function updateAllPrices() {
     // Update tier prices
     document.querySelectorAll('.tier-card').forEach(card => {
         const usdEl = card.querySelector('.price-usd');
         const pkrEl = card.querySelector('.price-pkr');
-        
+
         if (!usdEl || !pkrEl) return;
-        
+
         if (currentCurrency === 'PKR') {
             usdEl.style.display = 'none';
             pkrEl.style.display = 'inline';
@@ -28,35 +52,39 @@ function updateAllPrices() {
         }
     });
 
-    // Update modal price if open
-    const modalTotal = document.getElementById('sumTotal');
-    if (modalTotal && modalTotal.dataset.basePrice) {
-        const base = parseFloat(modalTotal.dataset.basePrice);
-        const displayPrice = currentCurrency === 'USD' 
-            ? '$' + base 
-            : '₨' + Math.round(base * EXCHANGE_RATE);
-        modalTotal.textContent = displayPrice;
+    // Update modal prices if open (both the price line and the total)
+    if (currentOrder) {
+        const sumPrice = $('sumPrice');
+        const sumTotal = $('sumTotal');
+        if (sumPrice) sumPrice.textContent = formatPrice(currentOrder.price, currentOrder.tier);
+        if (sumTotal) {
+            sumTotal.textContent = formatPrice(currentOrder.price, currentOrder.tier);
+            sumTotal.dataset.basePrice = currentOrder.price;
+        }
     }
 }
 
+function setCurrency(currency) {
+    if (currency !== 'USD' && currency !== 'PKR') return;
+    currentCurrency = currency;
+
+    const toggle = $('currencyToggle');
+    if (toggle) {
+        toggle.querySelectorAll('.currency-btn').forEach(b =>
+            b.classList.toggle('active', b.dataset.currency === currency));
+    }
+
+    try { localStorage.setItem('trl_currency', currency); } catch (e) {}
+    updateAllPrices();
+}
+
 function initCurrencyToggle() {
-    const toggle = document.getElementById('currencyToggle');
+    const toggle = $('currencyToggle');
     if (!toggle) return;
 
     toggle.addEventListener('click', (e) => {
         const btn = e.target.closest('.currency-btn');
-        if (!btn) return;
-
-        // Update active state
-        toggle.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        currentCurrency = btn.dataset.currency;
-        
-        // Persist preference
-        try { localStorage.setItem('trl_currency', currentCurrency); } catch(e){}
-        
-        updateAllPrices();
+        if (btn) setCurrency(btn.dataset.currency);
     });
 
     // Restore saved preference
@@ -64,27 +92,46 @@ function initCurrencyToggle() {
         const saved = localStorage.getItem('trl_currency');
         if (saved && (saved === 'USD' || saved === 'PKR')) {
             currentCurrency = saved;
-            const activeBtn = toggle.querySelector(`[data-currency="${saved}"]`);
-            if (activeBtn) {
-                toggle.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
-                activeBtn.classList.add('active');
-            }
+            toggle.querySelectorAll('.currency-btn').forEach(b =>
+                b.classList.toggle('active', b.dataset.currency === saved));
         }
-    } catch(e){}
+    } catch (e) {}
 
     // Initial render
     setTimeout(updateAllPrices, 50);
 }
 
-// ====================== MOBILE MENU (enhanced) ======================
-const menuBtn = document.getElementById('menuBtn');
-const mobileMenu = document.getElementById('mobileMenu');
+// ====================== FADE-IN REVEAL ======================
+function initFadeIn() {
+    const els = Array.from(document.querySelectorAll('.fade-in'));
+    if (!els.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+        els.forEach(el => el.classList.add('visible'));
+        return;
+    }
+
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                io.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    els.forEach(el => io.observe(el));
+}
+
+// ====================== MOBILE MENU ======================
+const menuBtn = $('menuBtn');
+const mobileMenu = $('mobileMenu');
 
 function toggleMenu(open) {
     if (!mobileMenu || !menuBtn) return;
     mobileMenu.classList.toggle('open', open);
     menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    
+
     const spans = menuBtn.querySelectorAll('span');
     if (open) {
         spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
@@ -125,38 +172,28 @@ if (menuBtn && mobileMenu) {
 }
 
 // ====================== ORDER MODAL ======================
-let currentOrder = null;
-
 function openOrderModal(tierName, usdPrice, eta) {
-    const modal = document.getElementById('orderModal');
+    const modal = $('orderModal');
     if (!modal) return;
 
     currentOrder = { tier: tierName, price: usdPrice, eta: eta };
 
     // Fill modal header
-    document.getElementById('modalTier').textContent = `Order ${tierName}`;
+    $('modalTier').textContent = `Order ${tierName}`;
 
     // Fill summary
-    const sumTier = document.getElementById('sumTier');
-    const sumPrice = document.getElementById('sumPrice');
-    const sumEta = document.getElementById('sumEta');
-    const sumTotal = document.getElementById('sumTotal');
+    $('sumTier').textContent = tierName;
+    $('sumEta').textContent = eta;
 
-    sumTier.textContent = tierName;
-    sumEta.textContent = eta;
-
-    const displayPrice = currentCurrency === 'USD' 
-        ? '$' + usdPrice 
-        : '₨' + Math.round(usdPrice * EXCHANGE_RATE);
-    
-    sumPrice.textContent = displayPrice;
-    sumTotal.textContent = displayPrice;
-    sumTotal.dataset.basePrice = usdPrice;
+    const displayPrice = formatPrice(usdPrice, tierName);
+    $('sumPrice').textContent = displayPrice;
+    $('sumTotal').textContent = displayPrice;
+    $('sumTotal').dataset.basePrice = usdPrice;
 
     // Prefill form if possible
-    const nameInput = document.getElementById('custName');
-    const phoneInput = document.getElementById('custPhone');
-    const dateInput = document.getElementById('custDate');
+    const nameInput = $('custName');
+    const phoneInput = $('custPhone');
+    const dateInput = $('custDate');
 
     try {
         if (nameInput && !nameInput.value) nameInput.value = localStorage.getItem('trl_last_name') || '';
@@ -167,10 +204,11 @@ function openOrderModal(tierName, usdPrice, eta) {
             d.setDate(d.getDate() + 1);
             dateInput.value = d.toISOString().split('T')[0];
         }
-    } catch(e){}
+    } catch (e) {}
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
 
     // Focus first field
     setTimeout(() => {
@@ -179,48 +217,79 @@ function openOrderModal(tierName, usdPrice, eta) {
 }
 
 function closeOrderModal() {
-    const modal = document.getElementById('orderModal');
+    const modal = $('orderModal');
     if (modal) {
         modal.classList.remove('open');
         modal.setAttribute('aria-hidden', 'true');
     }
+    document.body.style.overflow = '';
     currentOrder = null;
 }
 
+// Validate the order form; highlight the first bad field and toast the reason.
+function validateOrderForm() {
+    const name = $('custName');
+    const phone = $('custPhone');
+    const email = $('custEmail');
+    const details = $('custDetails');
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    let ok = true;
+    let firstBad = null;
+
+    [[name, v => v.trim().length >= 2],
+     [phone, v => v.replace(/[^\d]/g, '').length >= 10],
+     [email, v => emailRe.test(v.trim())],
+     [details, v => v.trim().length >= 4]].forEach(([el, test]) => {
+        if (!el) return;
+        const valid = test(el.value);
+        el.classList.toggle('input-error', !valid);
+        if (!valid && !firstBad) firstBad = el;
+        if (!valid) ok = false;
+    });
+
+    if (!ok) {
+        showToast('Please fill in your name, a valid WhatsApp number, and email.');
+        if (firstBad) firstBad.focus();
+    }
+    return ok;
+}
+
+// Clear field error styling as the user types
+['custName', 'custPhone', 'custEmail', 'custDetails'].forEach(id => {
+    const el = $(id);
+    if (el) el.addEventListener('input', () => el.classList.remove('input-error'));
+});
+
 // ESC closes modal
-document.addEventListener('keydown', function(e) {
-    const modal = document.getElementById('orderModal');
+document.addEventListener('keydown', function (e) {
+    const modal = $('orderModal');
     if (e.key === 'Escape' && modal && modal.classList.contains('open')) {
         closeOrderModal();
     }
 });
 
 // Close modal on backdrop click
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('orderModal');
+document.addEventListener('click', function (e) {
+    const modal = $('orderModal');
     if (modal && modal.classList.contains('open') && e.target === modal) {
         closeOrderModal();
     }
 });
 
-function copyOrderSummary() {
-    if (!currentOrder) return;
+function buildOrderSummaryText() {
+    const name = $('custName') ? $('custName').value.trim() : '';
+    const phone = $('custPhone') ? $('custPhone').value.trim() : '';
+    const email = $('custEmail') ? $('custEmail').value.trim() : '';
+    const details = $('custDetails') ? $('custDetails').value.trim() : '';
+    const date = $('custDate') ? $('custDate').value : '';
+    const price = formatPrice(currentOrder.price, currentOrder.tier);
 
-    const name = document.getElementById('custName')?.value || 'Customer';
-    const phone = document.getElementById('custPhone')?.value || '';
-    const details = document.getElementById('custDetails')?.value || '—';
-    const date = document.getElementById('custDate')?.value || '';
-
-    const price = currentCurrency === 'USD' 
-        ? '$' + currentOrder.price 
-        : '₨' + Math.round(currentOrder.price * EXCHANGE_RATE);
-
-    const summaryText = 
-`TRL SERVICE ORDER — ${currentOrder.tier}
+    return `TRL SERVICE ORDER — ${currentOrder.tier}
 ━━━━━━━━━━━━━━━━━━━
 Customer: ${name}
 WhatsApp: ${phone}
-Email: ${document.getElementById('custEmail')?.value || ''}
+Email: ${email}
 Details: ${details}
 ETA: ${currentOrder.eta}
 Total: ${price} (${currentCurrency})
@@ -228,52 +297,65 @@ Preferred start: ${date}
 ━━━━━━━━━━━━━━━━━━━
 50% deposit required to start.
 TRL Standard: Human-reviewed • On-time guarantee`;
+}
 
-    navigator.clipboard.writeText(summaryText).then(() => {
-        const origText = event.target ? event.target.textContent : '';
-        const btns = document.querySelectorAll('.btn-copy');
+function copyOrderSummary() {
+    if (!currentOrder || !validateOrderForm()) return;
+
+    const summaryText = buildOrderSummaryText();
+    const btns = Array.from(document.querySelectorAll('.btn-copy'));
+
+    const flashCopied = () => {
         btns.forEach(b => {
             const old = b.textContent;
             b.textContent = '✅ Copied!';
             setTimeout(() => { b.textContent = old; }, 1600);
         });
-    }).catch(() => {
-        // Fallback
-        const ta = document.createElement('textarea');
-        ta.value = summaryText;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        alert('Summary copied to clipboard!');
-    });
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(summaryText)
+            .then(flashCopied)
+            .catch(() => { legacyCopy(summaryText); flashCopied(); });
+    } else {
+        legacyCopy(summaryText);
+        flashCopied();
+    }
+}
+
+function legacyCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.cssText = 'position:fixed;top:-9999px;';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
 }
 
 function sendToWhatsApp() {
-    if (!currentOrder) return;
+    if (!currentOrder || !validateOrderForm()) return;
 
-    const name = encodeURIComponent(document.getElementById('custName')?.value || 'Customer');
-    const phone = document.getElementById('custPhone')?.value || '';
-    const details = encodeURIComponent(document.getElementById('custDetails')?.value || '');
-    const email = encodeURIComponent(document.getElementById('custEmail')?.value || '');
-    const date = document.getElementById('custDate')?.value || '';
+    const name = encodeURIComponent($('custName').value.trim());
+    const phone = $('custPhone').value.trim();
+    const details = encodeURIComponent($('custDetails').value.trim());
+    const email = encodeURIComponent($('custEmail').value.trim());
+    const date = $('custDate') ? $('custDate').value : '';
 
-    const priceDisplay = currentCurrency === 'USD' 
-        ? '$' + currentOrder.price 
-        : '₨' + Math.round(currentOrder.price * EXCHANGE_RATE);
+    const priceDisplay = formatPrice(currentOrder.price, currentOrder.tier);
+    const deposit = currentCurrency === 'USD'
+        ? '$' + Math.round(currentOrder.price * 0.5).toLocaleString('en-US')
+        : '₨' + Math.round((getTierPKR(currentOrder.tier) || currentOrder.price * EXCHANGE_RATE) * 0.5).toLocaleString('en-US');
 
-    const deposit = currentCurrency === 'USD' 
-        ? '$' + Math.round(currentOrder.price * 0.5) 
-        : '₨' + Math.round(currentOrder.price * EXCHANGE_RATE * 0.5);
-
-    const message = 
+    const message =
 `Hi TRL! I want to place an order for the *${currentOrder.tier}* package.
 
-Customer: ${name}
+Customer: ${decodeURIComponent(name)}
 WhatsApp: ${phone}
-Email: ${email}
+Email: ${decodeURIComponent(email)}
 
-Project details: ${details}
+Project details: ${decodeURIComponent(details)}
 
 ETA: ${currentOrder.eta}
 Total: ${priceDisplay} (${currentCurrency})
@@ -285,24 +367,24 @@ Please send me the payment link / invoice.`;
 
     // Save for later (customer's own device only)
     try {
-        localStorage.setItem('trl_last_name', document.getElementById('custName').value);
-        localStorage.setItem('trl_last_phone', document.getElementById('custPhone').value);
-    } catch(e){}
+        localStorage.setItem('trl_last_name', $('custName').value.trim());
+        localStorage.setItem('trl_last_phone', phone);
+    } catch (e) {}
 
     const waLink = `https://wa.me/923190091457?text=${encodeURIComponent(message)}`;
-    window.open(waLink, '_blank');
+    window.open(waLink, '_blank', 'noopener');
 
     // Close modal after a delay
     setTimeout(() => {
         closeOrderModal();
-        // Show toast
         showToast('Order sent to WhatsApp. Admin will follow up shortly.');
     }, 1200);
 }
 
 function showToast(msg) {
     const toast = document.createElement('div');
-    toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.4);z-index:99999;';
+    toast.className = 'trl-toast';
+    toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,0.4);z-index:99999;max-width:90vw;text-align:center;';
     toast.textContent = msg;
     document.body.appendChild(toast);
     setTimeout(() => {
@@ -312,55 +394,101 @@ function showToast(msg) {
     }, 2600);
 }
 
-// ====================== OTHER ENHANCEMENTS ======================
-function initScrollEffects() {
-    // Navbar scroll already exists in original, keep simple
-    const navbar = document.getElementById('navbar');
-    if (navbar) {
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 60) {
-                navbar.style.padding = '12px 48px';
-                navbar.style.background = 'rgba(5, 5, 5, 0.95)';
-            } else {
-                navbar.style.padding = '16px 48px';
-                navbar.style.background = 'rgba(5, 5, 5, 0.8)';
+// ====================== ACCESS FORM (AJAX) ======================
+function initAccessForm() {
+    const form = $('accessForm');
+    if (!form) return;
+
+    const btn = form.querySelector('.submit-btn');
+    const btnText = $('btnText');
+    const btnLoader = $('btnLoader');
+    const success = $('formSuccess');
+    const errorEl = $('formError');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (btn && btn.disabled) return;
+
+        if (btn) btn.disabled = true;
+        if (btnText) btnText.style.display = 'none';
+        if (btnLoader) {
+            btnLoader.style.display = 'inline';
+            btnLoader.textContent = 'Sending...';
+        }
+        if (success) success.classList.remove('show');
+        if (errorEl) {
+            errorEl.textContent = '';
+            errorEl.classList.remove('show');
+        }
+
+        try {
+            const res = await fetch(form.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(Object.fromEntries(new FormData(form).entries()))
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) {
+                throw new Error(data.message || data.error || 'Your request could not be sent. Please try again or email us directly.');
             }
-        }, { passive: true });
-    }
+
+            form.reset();
+            if (success) success.classList.add('show');
+            showToast("Request received! We'll be in touch soon.");
+        } catch (err) {
+            if (errorEl) {
+                errorEl.textContent = err.message || 'Something went wrong. Please try again or email us directly.';
+                errorEl.classList.add('show');
+            }
+        } finally {
+            if (btn) btn.disabled = false;
+            if (btnText) btnText.style.display = '';
+            if (btnLoader) btnLoader.style.display = 'none';
+        }
+    });
 }
 
-function initFormEnhancements() {
-    // Keep original form handling + add little polish
-    const accessForm = document.getElementById('accessForm');
-    if (accessForm) {
-        // already has handler from original — we can enhance slightly
-        const originalHandler = accessForm.onsubmit;
-        
-        // Add subtle success already in original; keep as-is
-    }
+// ====================== SCROLL EFFECTS ======================
+function initScrollEffects() {
+    // Class-based so the mobile CSS (narrower padding) is never overridden
+    const navbar = $('navbar');
+    if (!navbar) return;
 
-    // Debounced search hint (if future search added)
-    console.log('%c[TRL] Service Engine V2 ready', 'color:#64748b');
+    const onScroll = () => navbar.classList.toggle('scrolled', window.scrollY > 60);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
 }
 
 // ====================== INIT ======================
 function initTRLServiceEngine() {
+    // Footer year
+    const yearEl = $('year');
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
     // Currency
     initCurrencyToggle();
+
+    // Reveal on scroll
+    initFadeIn();
 
     // Scroll effects
     initScrollEffects();
 
-    // Forms
-    initFormEnhancements();
+    // Access form
+    initAccessForm();
 
     // Keyboard accessibility hint
-    document.addEventListener('keydown', function(e) {
-        if (e.key === '/' && document.activeElement.tagName === 'BODY') {
-            const search = document.querySelector('#services');
-            if (search) {
+    document.addEventListener('keydown', function (e) {
+        if (e.key === '/' && document.activeElement && document.activeElement.tagName === 'BODY') {
+            const target = document.querySelector('#services');
+            if (target) {
                 e.preventDefault();
-                search.scrollIntoView({ behavior: 'smooth' });
+                target.scrollIntoView({ behavior: 'smooth' });
             }
         }
     });
@@ -382,10 +510,7 @@ function initTRLServiceEngine() {
     // Expose for debugging / future plugin
     window.TRL = {
         openOrder: openOrderModal,
-        switchCurrency: (c) => {
-            currentCurrency = c;
-            updateAllPrices();
-        }
+        switchCurrency: setCurrency
     };
 
     console.log('%c[TRL V2] Service Engine initialized. Currency toggle, modal, ESC ready.', 'color:#10b981');

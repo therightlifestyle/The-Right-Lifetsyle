@@ -243,6 +243,14 @@ nav {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: padding 0.3s ease, background 0.3s ease;
+}
+
+/* Toggled by JS on scroll — class-based so the responsive padding
+   (see media queries below) is never overridden by inline styles */
+nav.scrolled {
+    padding: 12px 48px;
+    background: rgba(5, 5, 5, 0.95);
 }
 
 .nav-logo {
@@ -284,6 +292,11 @@ nav {
     flex-direction: column;
     gap: 5px;
     padding: 8px;
+}
+
+.menu-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
 
 .menu-btn span {
@@ -649,6 +662,11 @@ nav {
     color: white;
 }
 
+.close-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
 .modal-body {
     padding: 24px;
 }
@@ -743,6 +761,12 @@ nav {
 
 .btn-copy:hover {
     background: rgba(255,255,255,0.15);
+}
+
+/* Order form validation */
+.order-form input.input-error,
+.order-form textarea.input-error {
+    border-color: #EF4444 !important;
 }
 
 /* Admin Dashboard Styles */
@@ -880,9 +904,13 @@ nav {
         grid-template-columns: repeat(2, 1fr);
     }
     
+    /* Group hamburger + currency toggle on the right side */
+    .menu-btn {
+        margin-left: auto;
+    }
+    
     .currency-toggle {
-        margin-left: 0;
-        margin-top: 8px;
+        margin-left: 12px;
     }
 }
 
@@ -1888,6 +1916,21 @@ nav {
     color: #10B981;
 }
 
+.form-error {
+    display: none;
+    padding: var(--space-md);
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--radius-md);
+    font-size: 14px;
+    line-height: 1.5;
+    color: #F87171;
+}
+
+.form-error.show {
+    display: block;
+}
+
 /* ── Footer ── */
 footer {
     padding: var(--space-2xl) 0 var(--space-lg);
@@ -1972,13 +2015,16 @@ footer {
 }
 
 /* ── Animations ── */
-.fade-in {
+/* Fade-in only hides content when JS is running (the <html> gets a .js
+   class from an inline head script). With JS disabled everything stays
+   visible, and the reduced-motion override below wins as well. */
+.js .fade-in {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.7s ease, transform 0.7s ease;
 }
 
-.fade-in.visible {
+.js .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
 }
@@ -2017,6 +2063,10 @@ footer {
 @media (max-width: 900px) {
     nav {
         padding: 16px 24px;
+    }
+    
+    nav.scrolled {
+        padding: 12px 24px;
     }
     
     .nav-links {
